@@ -13,6 +13,17 @@ codex plugin add industry-report-agent@industry-report-agent-marketplace
 
 安装后新开一个 Codex 任务，使插件生效。
 
+### 可选：显示为独立“智能体”
+
+上面的插件安装已经包含完整研究能力。若还希望它出现在 Codex 的“智能体”区域，再执行：
+
+```bash
+git clone https://github.com/l0810lin-ship-it/industry-report-agent.git
+bash industry-report-agent/optional/custom-agent/install.sh
+```
+
+该启动器不包含另一套研究规则，也不引用创建者的本机路径；它只负责把独立 Agent 身份连接到已安装的 `industry-report-agent:industry-report-agent` Skill。安装脚本如发现已有同名配置，会先自动备份。完成后新建 Codex 任务。
+
 ### 2. 准备自己的资料文件夹
 
 第一次运行私有资料处理时，插件会自动创建：
@@ -35,7 +46,7 @@ Industry Report Knowledge/
 
 ### 3. 调用 Agent
 
-在 Codex 中选择 **Industry Report Agent**，或直接说：
+在 Codex 中选择插件 **Industry Report Agent**；安装了上面的可选启动器后，也可以在“智能体”区域选择 `industry_report`。还可以直接说：
 
 > 使用 Industry Report Agent 分析百度是否应进入本地生活 AI。Deep 模式，Markdown 格式。
 
