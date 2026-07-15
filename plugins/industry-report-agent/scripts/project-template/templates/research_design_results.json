@@ -1,0 +1,46 @@
+{
+  "hypothesis_assessments": [],
+  "inferred_trends": [],
+  "critical_claims": [],
+  "modules": {
+    "trend_inference": {
+      "status": "not_selected",
+      "trends": [],
+      "limitations": ""
+    },
+    "market_concentration": {
+      "status": "not_selected",
+      "classification": "unconfirmed",
+      "metrics": [],
+      "control_points": [],
+      "evidence_ids": [],
+      "limitations": ""
+    },
+    "geographic_sequencing": {
+      "status": "not_selected",
+      "observed_pattern": "insufficient_evidence",
+      "timeline_cases": [],
+      "regions": [],
+      "candidate_paths": [],
+      "why_not_largest_value_market_first": "",
+      "evidence_ids": [],
+      "limitations": ""
+    },
+    "real_case_studies": {
+      "status": "not_selected",
+      "selection_basis": "",
+      "cases": [],
+      "limitations": ""
+    },
+    "benchmark_ranges": {
+      "status": "not_selected",
+      "benchmarks": [],
+      "limitations": ""
+    },
+    "stress_test": {
+      "status": "not_selected",
+      "scenarios": [],
+      "limitations": ""
+    }
+  }
+}

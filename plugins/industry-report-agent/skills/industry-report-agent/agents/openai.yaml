@@ -1,0 +1,7 @@
+interface:
+  display_name: "Industry Report Agent"
+  short_description: "Management-grade strategy research with evidence gates"
+  default_prompt: "Use $industry-report-agent as an enterprise strategy and industry-research lead. Before configuring, estimating, collecting, or drafting, ask one blocking combined question for Flash/Standard/Deep and Markdown/Word/PowerPoint unless the user already specified both; silence is not delegation. After selection, separately report scope, research time, format-production overhead, total ETA, and the completion window, then execute the evidence-gated workflow."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,24 @@
+{
+  "name": "industry-report-agent",
+  "version": "0.10.0",
+  "description": "Generate and test candidate industry patterns, validate critical claims, route topic-specific research modules, size markets, model unit economics, and deliver Markdown, Word, or PowerPoint strategy reports.",
+  "author": {
+    "name": "Construct"
+  },
+  "repository": "https://github.com/l0810lin-ship-it/industry-report-agent",
+  "keywords": ["industry-research", "strategy", "evidence", "rag", "market-sizing"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Industry Report Agent",
+    "shortDescription": "Management-grade strategy research with evidence gates.",
+    "longDescription": "Acts as an enterprise strategy and industry-research lead for management decisions. It converts ambiguous topics into explicit decision questions, selects Flash/Standard/Deep scope and MD/Word/PPT delivery, generates unverified candidate patterns and tests them against actor-level chronology, denominators and counterexamples, routes concentration, geographic sequencing, real-case, benchmark and stress modules, validates critical claims, sizes markets top-down and bottom-up, and adapts unit economics to the revenue model.",
+    "developerName": "Construct",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write", "Interactive"],
+    "defaultPrompt": [
+      "Start an evidence-gated strategy report and first ask me to choose its mode and delivery format.",
+      "Analyze a company and market, beginning with the required mode-and-format selection.",
+      "Research a cross-border sector after asking me to choose scope and output format."
+    ]
+  }
+}

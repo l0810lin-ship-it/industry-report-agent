@@ -1,0 +1,19 @@
+.DS_Store
+.env
+.env.*
+*.key
+*.pem
+__pycache__/
+*.pyc
+industry-report-knowledge/
+Industry Report Knowledge/
+industry-report-runs/
+output/
+benchmark-runs/
+*.docx
+*.xlsx
+*.xls
+*.pdf
+*.csv
+!docs/**/*.pdf
+!examples/**/*.csv

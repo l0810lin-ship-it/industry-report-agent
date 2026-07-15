@@ -1,0 +1,77 @@
+{
+  "flash": {
+    "label": "Flash",
+    "base_minutes": [15, 25],
+    "deliverable": "1–2 页决策快报，不强制生成五章",
+    "caps": {
+      "questions": 2,
+      "competitors": 2,
+      "queries": 5,
+      "candidate_results_per_query": 5,
+      "platform_sources": 1,
+      "deep_reads": 6
+    },
+    "format_overhead_minutes": {
+      "md": [0, 0],
+      "docx": [8, 15],
+      "pptx": [15, 25]
+    },
+    "phases": {
+      "source_discovery": [2, 4],
+      "deep_read_and_dedup": [2, 5],
+      "quality_validation_and_repairs": [2, 4],
+      "decision_synthesis": [5, 8],
+      "report_assembly_and_review": [4, 4]
+    }
+  },
+  "standard": {
+    "label": "Standard",
+    "base_minutes": [35, 60],
+    "deliverable": "管理层摘要 + 五章战略决策报告",
+    "caps": {
+      "questions": 3,
+      "competitors": 3,
+      "queries": 8,
+      "candidate_results_per_query": 12,
+      "platform_sources": 1,
+      "deep_reads": 12
+    },
+    "format_overhead_minutes": {
+      "md": [0, 0],
+      "docx": [10, 20],
+      "pptx": [20, 35]
+    },
+    "phases": {
+      "source_discovery": [4, 8],
+      "deep_read_and_dedup": [4, 9],
+      "quality_validation_and_repairs": [4, 8],
+      "decision_synthesis": [16, 24],
+      "report_assembly_and_review": [7, 11]
+    }
+  },
+  "deep": {
+    "label": "Deep",
+    "base_minutes": [90, 150],
+    "deliverable": "管理层摘要 + 五章深度报告 + 情景/附录",
+    "caps": {
+      "questions": 6,
+      "competitors": 8,
+      "queries": 24,
+      "candidate_results_per_query": 20,
+      "platform_sources": 3,
+      "deep_reads": 25
+    },
+    "format_overhead_minutes": {
+      "md": [0, 0],
+      "docx": [15, 25],
+      "pptx": [30, 50]
+    },
+    "phases": {
+      "source_discovery": [12, 24],
+      "deep_read_and_dedup": [15, 28],
+      "quality_validation_and_repairs": [12, 22],
+      "decision_synthesis": [35, 55],
+      "report_assembly_and_review": [16, 21]
+    }
+  }
+}

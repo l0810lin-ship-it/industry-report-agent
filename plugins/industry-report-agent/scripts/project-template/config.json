@@ -1,0 +1,102 @@
+{
+  "research_mode": "<required>",
+  "intake": {
+    "mode_selection": {
+      "status": "pending",
+      "source": ""
+    },
+    "format_selection": {
+      "status": "pending",
+      "source": ""
+    }
+  },
+  "target": {
+    "company": "<required>",
+    "industry": "<required>",
+    "year": "<required>",
+    "region": "<required>"
+  },
+  "competitors": [],
+  "research_questions": [],
+  "user_hypotheses": [],
+  "research_keywords": [],
+  "focus_queries": [],
+  "competitor_keywords": {},
+  "platform_queries": [],
+  "source_priorities": [
+    "official",
+    "regulatory_and_research",
+    "reputable_media",
+    "community_and_user_voice"
+  ],
+  "collection": {
+    "search_results_per_query": 5,
+    "adaptive_discovery": {
+      "enabled": true,
+      "expansion_step": 5,
+      "min_new_urls_to_continue": 2
+    },
+    "platform_results_per_query": 10,
+    "max_deep_reads": 0,
+    "deep_read_timeout_seconds": 20,
+    "deep_read_max_chars": 12000
+  },
+  "source_rules": {
+    "official_domains": [],
+    "regulatory_domains": [],
+    "research_domains": [],
+    "media_domains": []
+  },
+  "knowledge": {
+    "enabled": true,
+    "paths": [],
+    "directory": "",
+    "environment_variable": "INDUSTRY_REPORT_KNOWLEDGE_DIR",
+    "default_directory": "~/Documents/Industry Report Knowledge",
+    "retrieval": "local_bm25",
+    "top_k_per_question": 6,
+    "keep_separate_from_public_evidence": true,
+    "default_confidentiality": "private",
+    "default_allow_quote_in_report": false,
+    "default_allow_public_export": false
+  },
+  "quality_gates": {
+  },
+  "research_design": {
+    "active_modules": [],
+    "module_rationale": {},
+    "candidate_trends": [],
+    "case_studies": {
+      "minimum": 0,
+      "selection_criteria": []
+    }
+  },
+  "deliverable": {
+    "executive_summary": true,
+    "optional_product_appendix": false
+  },
+  "economics": {
+    "business_models": [],
+    "primary_unit": "",
+    "market_sizing": {
+      "required_methods": [
+        "top_down",
+        "bottom_up"
+      ],
+      "reconciliation_threshold": 0.3
+    },
+    "scenarios": [
+      "downside",
+      "base",
+      "upside"
+    ]
+  },
+  "output": {
+    "dir": "./output",
+    "formats": [],
+    "docx_preset": "standard_business_brief",
+    "ppt_style": "kc-25-minimal-data-story",
+    "ppt_editable": true
+  },
+  "claude_model": "claude-opus-4-8"
+}
