@@ -10,6 +10,7 @@ Industry Report Knowledge/
 industry-report-runs/
 output/
 benchmark-runs/
+evaluation/.demo/
 *.docx
 *.xlsx
 *.xls

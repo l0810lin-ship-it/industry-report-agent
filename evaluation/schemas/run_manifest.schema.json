@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Run manifest row",
+  "type": "object",
+  "required": ["sample_id", "system", "case_id", "status", "input_sha256", "output_sha256"],
+  "properties": {
+    "sample_id": {"type": "string"},
+    "system": {"type": "string"},
+    "case_id": {"type": "string"},
+    "status": {"enum": ["completed", "failed"]},
+    "input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "output_sha256": {"type": "string"}
+  }
+}

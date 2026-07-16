@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {
+      "id": "sample-market-raw",
+      "scenario": "sample-market",
+      "group": "raw",
+      "prompt": "分析一个新兴消费市场，说明是否值得进入。"
+    },
+    {
+      "id": "sample-market-controlled",
+      "scenario": "sample-market",
+      "group": "controlled",
+      "prompt": "分析一个新兴消费市场，使用中文输出，并给出可追溯来源、Top-down 与 Bottom-up 市场测算、商业模式、竞争格局、反证和 90 天验证计划。"
+    }
+  ]
+}

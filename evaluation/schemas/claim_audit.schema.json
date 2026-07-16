@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Claim audit row",
+  "type": "object",
+  "required": ["sample_id", "claim_id", "claim_text", "verification_status"],
+  "properties": {
+    "verification_status": {
+      "enum": ["pending", "supported", "partially_supported", "unsupported", "contradicted", "unverifiable"]
+    }
+  }
+}

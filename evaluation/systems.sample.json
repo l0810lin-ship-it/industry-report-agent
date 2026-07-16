@@ -1,0 +1,16 @@
+{
+  "systems": [
+    {
+      "id": "mock-system-a",
+      "model": "mock",
+      "search_backend": "none",
+      "command": ["python3", "examples/mock_runner.py", "--input", "{input}", "--output", "{output}", "--label", "A"]
+    },
+    {
+      "id": "mock-system-b",
+      "model": "mock",
+      "search_backend": "none",
+      "command": ["python3", "examples/mock_runner.py", "--input", "{input}", "--output", "{output}", "--label", "B"]
+    }
+  ]
+}

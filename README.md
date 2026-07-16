@@ -124,6 +124,10 @@ python3 /path/to/plugin-creator/scripts/validate_plugin.py \
   plugins/industry-report-agent
 ```
 
+## 可复现评测 Harness
+
+仓库同时提供独立于 Agent 运行逻辑的[公开评测框架](evaluation/README.md)，用于冻结 Prompt、串行运行多个系统、保留失败与重试、审计关键 Claim、生成匿名评分包，并通过完整性闸门防止残缺结果被误报为完成。内置 mock runner 只验证框架是否能正确工作，不代表任何系统的研究质量。
+
 ## 依赖说明
 
 - 正常 Codex Agent 流程不需要 Anthropic API Key。
