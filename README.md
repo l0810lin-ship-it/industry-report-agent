@@ -1,6 +1,8 @@
 # Industry Report Agent
 
-面向管理层战略决策的证据治理型行业研究 Agent。它将模糊课题拆解为研究问题，执行公开资料检索与私有资料检索，建立证据账本和关键 Claim 状态，并输出市场测算、商业模式、竞争控制点、首发下注卡和 90 天验证计划。
+面向管理层战略决策的证据治理型行业研究 Agent。它将模糊课题先分类为决策类型、研究问题类型和交付意图，再执行公开资料检索与私有资料检索，建立证据账本和关键 Claim 状态，并输出市场测算、商业模式、竞争控制点、首发下注卡和 90 天验证计划。
+
+它是管理决策支持工具，不是自动战略决策系统。目标用户、输入输出、质量指标、风险、兜底行为和不支持范围见 [Model Requirement Sheet](MODEL_REQUIREMENT_SHEET.md)。
 
 ## 同事最快使用方式
 
@@ -77,6 +79,8 @@ export INDUSTRY_REPORT_KNOWLEDGE_DIR="$HOME/my-research-docs"
 ```text
 课题输入
 → Flash / Standard / Deep 与格式选择
+→ 决策类型 / 问题类型 / 交付意图分类
+→ 记忆策略检查：复用工作流经验，阻断旧结论
 → 研究问题和检索计划
 → 本地私有资料解析与 BM25 检索
 → 公开网络证据采集和原文深读
@@ -87,6 +91,26 @@ export INDUSTRY_REPORT_KNOWLEDGE_DIR="$HOME/my-research-docs"
 → 首发赛道、产品形态与 90 天决策门
 → Markdown / Word / PowerPoint
 ```
+
+## 分类路由
+
+Agent 不直接把用户问题丢给模型写报告，而是先建立 `classification`：
+
+- `decision_type`：进入市场、发布产品、投资配置、验证假设、监控市场或解释格局。
+- `question_types`：市场规模、用户需求、竞争控制点、商业模式、单位经济、GTM、监管风险、Right to Win、验证计划等。
+- `deliverable_intent`：决策快报、管理层报告、董事会 memo、PPT story 或 benchmark packet。
+
+分类结果决定必须收集什么证据、启用哪些研究模块、哪些质量门必须通过。比如进入市场类问题必须覆盖市场测算、竞争、商业模式、Right to Win 和 90 天验证计划；跨境问题必须启用地理顺序和趋势推断；验证假设必须同时查支持和反证。
+
+## 记忆管理
+
+Agent 使用分层记忆，不把“记住东西”当成无条件复用：
+
+- 可复用：工具路径、失败修复、用户格式偏好、当前 run 上下文、评测坏案例。
+- 需重验：历史 URL、来源缓存、旧文档解析结果。
+- 禁止自动复用：旧市场结论、旧推荐、旧排名、旧市场规模、旧证据数量。
+
+旧报告只能在用户明确提供或批准时作为 `PRI-*` 私有证据进入当前 run，不能被悄悄改名成新的独立研究结果。
 
 ## 私有资料边界
 
@@ -127,6 +151,8 @@ python3 /path/to/plugin-creator/scripts/validate_plugin.py \
 ## 可复现评测 Harness
 
 仓库同时提供独立于 Agent 运行逻辑的[公开评测框架](evaluation/README.md)，用于冻结 Prompt、串行运行多个系统、保留失败与重试、审计关键 Claim、生成匿名评分包，并通过完整性闸门防止残缺结果被误报为完成。内置 mock runner 只验证框架是否能正确工作，不代表任何系统的研究质量。
+
+Harness 分三层使用：smoke test 验证框架自身，regression test 验证脚本、schema、模板或证据治理变更没有破坏关键路径，full benchmark 才用于真实系统横向比较。Claim audit、证据门禁和回归触发条件见 [evaluation/protocol.md](evaluation/protocol.md)。
 
 ## 依赖说明
 

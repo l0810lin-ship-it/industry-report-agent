@@ -22,6 +22,14 @@ VALID_TREND_CLASSES = {"supported_in_sample", "emerging_signal", "isolated_case"
 VALID_MODULE_STATUS = {"complete", "insufficient_evidence", "not_selected"}
 VALID_COUNTER_STATUS = {"found", "searched_none_found", "not_applicable"}
 VALID_OBSERVED_PATTERNS = {"supported_in_sample", "recurring_signal", "mixed", "insufficient_evidence"}
+VALID_MEMORY_CLASSES = {
+    "operational",
+    "user_preference",
+    "source_cache",
+    "run_context",
+    "evaluation_learning",
+    "conclusion",
+}
 
 
 def listify(value: object) -> list[str]:
@@ -57,6 +65,45 @@ def main() -> int:
             if shallow:
                 fail(f"{check}:deep_read_required", shallow)
         return known
+
+    classification = config.get("classification", {}) if isinstance(config.get("classification", {}), dict) else {}
+    classification_review = results.get("classification_review", {})
+    if str(config["research_mode"]) != "flash":
+        if not isinstance(classification_review, dict) or not classification_review:
+            fail("classification_review", "missing")
+        else:
+            if classification_review.get("decision_type") != classification.get("decision_type"):
+                fail("classification_review:decision_type", {
+                    "configured": classification.get("decision_type"),
+                    "reviewed": classification_review.get("decision_type"),
+                })
+            if classification_review.get("deliverable_intent") != classification.get("deliverable_intent"):
+                fail("classification_review:deliverable_intent", {
+                    "configured": classification.get("deliverable_intent"),
+                    "reviewed": classification_review.get("deliverable_intent"),
+                })
+            if not isinstance(classification_review.get("question_type_coverage", []), list):
+                fail("classification_review:question_type_coverage", "must be a list")
+
+    memory_policy = config.get("memory_policy", {}) if isinstance(config.get("memory_policy", {}), dict) else {}
+    memory_review = results.get("memory_review", {})
+    if not isinstance(memory_review, dict) or not memory_review:
+        fail("memory_review", "missing")
+    else:
+        reused_memory = set(listify(memory_review.get("reused_memory_classes", [])))
+        blocked_memory = set(listify(memory_review.get("blocked_memory_classes", [])))
+        invalid_memory = sorted((reused_memory | blocked_memory) - VALID_MEMORY_CLASSES)
+        if invalid_memory:
+            fail("memory_review:valid_classes", invalid_memory)
+        if "conclusion" in reused_memory:
+            fail("memory_review:conclusion_reuse", "conclusion memory cannot be reused")
+        expected_blocked = set(listify(memory_policy.get("blocked_memory_classes", [])))
+        missing_blocked = sorted(expected_blocked - blocked_memory)
+        if missing_blocked:
+            fail("memory_review:blocked_classes_disclosed", missing_blocked)
+        if memory_policy.get("source_cache_requires_revalidation") is True and "source_cache" in reused_memory:
+            if not memory_review.get("source_cache_revalidated"):
+                fail("memory_review:source_cache_revalidated", "required when source_cache is reused")
 
     configured_hypotheses = {
         str(item.get("id")): item

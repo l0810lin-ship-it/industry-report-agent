@@ -16,6 +16,19 @@
     "year": "<required>",
     "region": "<required>"
   },
+  "classification": {
+    "decision_type": "",
+    "user_role": "unknown",
+    "time_horizon": "unspecified",
+    "geographic_scope": {
+      "regions": [],
+      "cross_border": false
+    },
+    "deliverable_intent": "",
+    "primary_question_types": [],
+    "routing_rationale": "",
+    "required_gates": []
+  },
   "competitors": [],
   "research_questions": [],
   "user_hypotheses": [],
@@ -59,6 +72,22 @@
     "default_confidentiality": "private",
     "default_allow_quote_in_report": false,
     "default_allow_public_export": false
+  },
+  "memory_policy": {
+    "fresh_run_required": true,
+    "allowed_memory_classes": [
+      "operational",
+      "user_preference",
+      "source_cache",
+      "run_context",
+      "evaluation_learning"
+    ],
+    "blocked_memory_classes": [
+      "conclusion"
+    ],
+    "source_cache_requires_revalidation": true,
+    "prior_reports_as_private_sources_only": true,
+    "memory_use_log": []
   },
   "quality_gates": {
   },

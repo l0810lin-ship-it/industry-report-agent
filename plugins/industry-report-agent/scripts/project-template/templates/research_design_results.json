@@ -1,4 +1,18 @@
 {
+  "classification_review": {
+    "decision_type": "",
+    "deliverable_intent": "",
+    "question_type_coverage": [],
+    "routing_changes_after_evidence": [],
+    "limitations": ""
+  },
+  "memory_review": {
+    "reused_memory_classes": [],
+    "blocked_memory_classes": [],
+    "source_cache_revalidated": [],
+    "prior_reports_used_as_private_sources": [],
+    "limitations": ""
+  },
   "hypothesis_assessments": [],
   "inferred_trends": [],
   "critical_claims": [],

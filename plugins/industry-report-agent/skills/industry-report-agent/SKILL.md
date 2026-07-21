@@ -34,11 +34,13 @@ You are not a generic search assistant, an industry encyclopedia, a marketing-co
 - Output format contract: `references/output-format-contract.md`
 - Research design and trend inference contract: `references/research-design-contract.md`
 - Critical claim contract: `references/claim-validation-contract.md`
+- Memory contract: `references/memory-contract.md`
+- Taxonomy contract: `references/taxonomy-contract.md`
 - Authoritative mode, scope and format-time profiles: `../../scripts/project-template/mode_profiles.json`
 - Duration estimator: `../../scripts/project-template/scripts/estimate_duration.py`
 - Optional local private-evidence processor: `../../scripts/project-template/scripts/process_knowledge.py`
 
-Resolve paths relative to this file. Read the research design contract before configuring questions or sources. Read the evidence and claim contracts before repairing quality failures or drafting claims. Read the decision report, market sizing and business model contracts before writing the deliverable. Read the output format contract before estimating or producing a selected format.
+Resolve paths relative to this file. Read the memory contract before reusing any prior context. Read the taxonomy contract before configuring the assignment. Read the research design contract before configuring questions or sources. Read the evidence and claim contracts before repairing quality failures or drafting claims. Read the decision report, market sizing and business model contracts before writing the deliverable. Read the output format contract before estimating or producing a selected format.
 
 ## Workflow
 
@@ -47,6 +49,14 @@ Resolve paths relative to this file. Read the research design contract before co
 Treat every user assignment as an independent run whose scope and conclusions are derived from the current input. A prior report may be used only as a disclosed source supplied by the user; it must never be copied or relabeled as a new Agent result.
 
 Do not consult internal memory, prior run summaries or earlier reports for topic conclusions in a fresh assignment unless the user explicitly asks to reuse them. Operational lessons such as tool paths and failure handling may be reused, but prior market facts, country rankings, strategic recommendations and evidence counts must be recollected or revalidated in the current run.
+
+Apply `references/memory-contract.md` and record the run's memory posture in `config.json.memory_policy`:
+
+- allowed memory classes: operational lessons, user preferences, source-cache leads, current run context and evaluation learning;
+- blocked memory class: prior conclusions, opportunity scores, market facts, rankings and recommendations;
+- source-cache memory is only a lead to reopen or revalidate a source, never final evidence;
+- prior reports can be used only as disclosed `PRI-*` private sources when the user supplies or approves them;
+- preserve a `memory_use_log` item when any prior context changes workflow, retrieval or output style.
 
 ```bash
 bash ../../scripts/create_run.sh "/absolute/workspace/path/industry-report-runs/<slug>"
@@ -88,6 +98,7 @@ If the necessary scope exceeds the selected contract, narrow it or recommend the
 4. Configure the current topic. Replace all placeholders and update:
 
 - `target.company`, `target.industry`, `target.region`, and `target.year`
+- `classification.decision_type`, `user_role`, `time_horizon`, `geographic_scope`, `deliverable_intent`, `primary_question_types`, `routing_rationale`, and `required_gates`
 - `research_questions`
 - `competitors` and `competitor_keywords`
 - `research_keywords` and `focus_queries`
@@ -100,7 +111,15 @@ If the necessary scope exceeds the selected contract, narrow it or recommend the
 - optional `quality_gates` overrides
 - `collection.max_deep_reads` to match the mode ceiling
 
-Derive every company, platform, competitor and query from the current task. Give each research question a stable ID and map every query with `question_ids`. Map dynamic-module searches with `module_ids`; map candidate trend searches with `trend_ids`; map user-lead tests with `hypothesis_ids` and `stance`. Treat `platform_queries` as a source plan, not a mandatory checklist. Select a platform only when it materially answers a research question.
+Derive every company, platform, competitor and query from the current task. Give each research question a stable ID and assign `question_types` from `references/taxonomy-contract.md`. Map every query with `question_ids`. Map dynamic-module searches with `module_ids`; map candidate trend searches with `trend_ids`; map user-lead tests with `hypothesis_ids` and `stance`. Treat `platform_queries` as a source plan, not a mandatory checklist. Select a platform only when it materially answers a research question.
+
+Classification is the routing layer. It must be completed before search planning and may be updated only when evidence changes the assignment scope. Use it to decide required modules and gates:
+
+- `enter_market`, `launch_product` and `invest_or_allocate` require market sizing, business model, competition, Right to Win and validation-plan coverage.
+- `validate_hypothesis` requires balanced support and disconfirm searches.
+- `compare_options` requires comparable criteria and a single recommended option when evidence supports it.
+- `monitor_market` can produce signals but should not force a confident recommendation.
+- Cross-border work requires both `trend_inference` and `geographic_sequencing`.
 
 For cross-border topics, activate both `trend_inference` and `geographic_sequencing` even when the user does not propose a route. Do not insert a default route. Generate possible sequences only as unverified candidates, search actual actor timelines and counterexamples, and distinguish a pattern observed within the defined sample from the route recommended for the target. Activate `market_concentration` for monopoly/concentration questions and `real_case_studies` when real cases can change the decision.
 
@@ -180,7 +199,7 @@ If the primary discovery backend fails, use the collector's built-in fallback ch
 - Do not require CPI, LTV/CAC, paid conversion or per-title cost when they do not fit the selected engine. Conversely, do not omit them when they are decision-critical.
 - If inputs are missing, preserve formulas, input gaps, break-even thresholds, confidence and validation steps. Never fabricate a completed investment model.
 
-Before drafting the report, fill `output/analyzed/research_design_results.json` from `templates/research_design_results.json`. Record inferred trends, hypothesis resolutions, critical claims, counter-search status and active-module results.
+Before drafting the report, fill `output/analyzed/research_design_results.json` from `templates/research_design_results.json`. Record classification review, memory review, inferred trends, hypothesis resolutions, critical claims, counter-search status and active-module results. If the evidence changes the initial route, preserve the original classification and explain the routing change instead of silently rewriting the task.
 
 10. Produce the mode-specific deliverable without requiring an Anthropic API key in the normal Codex flow.
 
@@ -230,12 +249,14 @@ The deliverable gate is the single owner of narrative completeness. Do not repla
 
 The report must display critical-claim statuses separately: fully supported, mixed, provisional and rejected. Never merge fully supported and partially/provisionally supported claims into one headline rate. Report both counts and denominators so management can see how much of the recommendation rests on unresolved evidence.
 
-12. Report the run directory, selected mode, selected formats, active research modules, inferred trend status, actual backends, candidate/deduplicated/deep-read counts, all gate statuses, repairs, residual limitations and absolute path for every requested deliverable.
+12. Report the run directory, selected mode, selected formats, assignment classification, memory classes reused or blocked, active research modules, inferred trend status, actual backends, candidate/deduplicated/deep-read counts, all gate statuses, repairs, residual limitations and absolute path for every requested deliverable.
 
 ## Guardrails
 
 - Never mutate files under the plugin template during a normal run.
 - Never allow a benchmark harness, template or setup script to author conclusions or report prose on the Agent's behalf. A harness may freeze input, start a fresh run, record timestamps and collect artifacts only.
+- Never let memory override current-run evidence. Prior conclusions can be search leads or disclosed private sources only, not report facts.
+- Never skip assignment classification. If the decision type is unclear, classify it as `explain_landscape` or ask the user when that would materially change the research.
 - Never start duplicate collection, enrichment or validation processes against one run directory. Respect `output/.collect.lock`, poll the existing process and retry only after a terminal exit or a verified stale lock.
 - Never hand off or link a formal report when any of the four plan/evidence/results/deliverable gates is not `pass`; a file that exists behind a failed gate is a rejected draft, not a completed result.
 - Never reuse, copy or relabel a report body across distinct prompts or benchmark samples. Each sample must execute independently from its own frozen input; cross-sample evidence reuse is allowed only when the protocol explicitly permits it and the reuse is disclosed.

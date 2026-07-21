@@ -2,6 +2,13 @@
 
 这是 `industry_report` 自定义 Agent 的单次运行模板。每个题目都先配置范围和研究模式，再决定来源；模板不预设公司、行业、竞品或社区平台。
 
+每次运行必须先完成两层治理：
+
+- `classification`：决策类型、问题类型、地理范围、交付意图和必需质量门。
+- `memory_policy`：允许复用的记忆类别、被阻断的旧结论记忆、来源缓存重验规则。
+
+这些字段会被 `plan` 闸门检查。它们防止 Agent 把模糊问题当成普通资料汇总，也防止把旧报告结论当成新证据。
+
 ## 三种研究模式
 
 Flash、Standard、Deep 的基础时间、范围、交付物和格式制作耗时只在 `mode_profiles.json` 中定义。开工前必须让用户选择模式和格式，不设置静默默认值。
@@ -26,7 +33,8 @@ Standard/Deep 报告回答五个管理问题：
 
 - `research_mode`：`flash`、`standard` 或 `deep`
 - `target`：公司/主题、行业、年份和地区
-- `research_questions`：稳定 ID 和 `critical` 标记
+- `classification`：先判断 `decision_type`、`deliverable_intent` 和 `primary_question_types`，再决定研究模块与质量门
+- `research_questions`：稳定 ID、`critical` 标记和 `question_types`
 - `user_hypotheses`：只记录用户主动提供、会改变决策且需要验证的线索；可以为空
 - `research_design.active_modules`：按问题启用趋势推断、集中度、区域顺序、真实案例、基准区间或压力测试
 - `research_design.candidate_trends`：可为空；填写时只能记录 `status: unverified` 的候选模式，不能预设结论；Agent 也必须从多主体时间线中主动发现并核验候选趋势
@@ -44,6 +52,7 @@ Standard/Deep 报告回答五个管理问题：
 - `economics.market_sizing`：Standard/Deep 固定要求 `top_down` + `bottom_up`
 - `output.formats`：从 `md`、`docx`、`pptx` 中选择一个或多个；不得静默默认
 - `knowledge`：可选的共享本地私有资料检索。优先读取 `INDUSTRY_REPORT_KNOWLEDGE_DIR`，其次读取 `knowledge.paths`，否则首次运行自动创建 `~/Documents/Industry Report Knowledge`。资料只需放一次；每次运行按当前研究问题检索相关片段。私有证据使用 `PRI-*`，不并入公开证据账本，也不能替代公开来源质量闸门
+- `memory_policy`：默认要求 fresh run，允许复用工具经验、用户偏好、来源缓存线索、当前 run 上下文和评测经验；禁止自动复用旧结论、旧市场规模、旧排名和旧推荐
 
 所有查询都用 `question_ids` 映射到研究问题；动态模块使用 `module_ids`，候选趋势使用 `trend_ids`，用户线索测试使用 `hypothesis_ids` 和 `stance`。跨境课题自动启用 `trend_inference` + `geographic_sequencing`，但不得预置任何地区顺序；路线只能作为 `unverified` 候选，经主体时间线、反例和 `n/N` 样本核验后再分类。
 

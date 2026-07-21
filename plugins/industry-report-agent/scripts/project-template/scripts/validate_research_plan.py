@@ -25,6 +25,66 @@ VALID_MODULES = {
     "stress_test",
 }
 VALID_STANCES = {"support", "disconfirm", "neutral"}
+VALID_DECISION_TYPES = {
+    "enter_market",
+    "launch_product",
+    "invest_or_allocate",
+    "defend_position",
+    "compare_options",
+    "validate_hypothesis",
+    "monitor_market",
+    "explain_landscape",
+}
+VALID_USER_ROLES = {
+    "founder_operator",
+    "strategy_team",
+    "product_team",
+    "investor_advisor",
+    "researcher",
+    "unknown",
+}
+VALID_TIME_HORIZONS = {"near_term_90_days", "annual_planning", "multi_year", "unspecified"}
+VALID_DELIVERABLE_INTENTS = {
+    "decision_brief",
+    "management_report",
+    "board_memo",
+    "ppt_storyline",
+    "benchmark_packet",
+}
+VALID_QUESTION_TYPES = {
+    "market_size",
+    "timing",
+    "customer_problem",
+    "demand_signal",
+    "competition",
+    "control_points",
+    "business_model",
+    "unit_economics",
+    "go_to_market",
+    "geographic_sequence",
+    "regulatory_or_platform_risk",
+    "technology_shift",
+    "right_to_win",
+    "validation_plan",
+}
+VALID_MEMORY_CLASSES = {
+    "operational",
+    "user_preference",
+    "source_cache",
+    "run_context",
+    "evaluation_learning",
+    "conclusion",
+}
+DECISION_REQUIRED_QUESTION_TYPES = {
+    "enter_market": {"market_size", "competition", "business_model", "right_to_win", "validation_plan"},
+    "launch_product": {"customer_problem", "competition", "business_model", "right_to_win", "validation_plan"},
+    "invest_or_allocate": {"market_size", "competition", "unit_economics", "right_to_win", "validation_plan"},
+    "defend_position": {"competition", "control_points", "right_to_win"},
+    "compare_options": {"competition", "business_model", "right_to_win"},
+    "validate_hypothesis": set(),
+    "monitor_market": {"demand_signal"},
+    "explain_landscape": set(),
+}
 FORBIDDEN_PERSONAL_MVP_KEYS = {"expert_sources", "enterprise_sources", "internal_data_connectors"}
 MODULE_TRIGGERS = {
     "trend_inference": r"趋势|主流路径|普遍路径|行业路径|演变|路线|先.+再|trend|trajectory|recurring pattern|common path",
@@ -92,6 +152,15 @@ def question_text(config: dict) -> str:
     return "\n".join(str(item) for item in values)
 
 
+def question_types(config: dict) -> set[str]:
+    types: set[str] = set()
+    for item in config.get("research_questions", []):
+        if isinstance(item, dict):
+            types.update(listify(item.get("question_types", [])))
+    types.update(listify(config.get("classification", {}).get("primary_question_types", [])))
+    return types
+
+
 def main() -> int:
     config = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
     mode, output_formats, intake_failures = validate_intake_config(config)
@@ -109,6 +178,57 @@ def main() -> int:
     entries = query_entries(config)
     failures = list(intake_failures)
     warnings = []
+
+    classification = config.get("classification", {}) if isinstance(config.get("classification", {}), dict) else {}
+    decision_type = str(classification.get("decision_type", "")).strip()
+    if decision_type not in VALID_DECISION_TYPES:
+        failures.append({"check": "classification:decision_type", "detail": decision_type or "missing"})
+    if classification.get("user_role", "unknown") not in VALID_USER_ROLES:
+        failures.append({"check": "classification:user_role", "detail": classification.get("user_role")})
+    if classification.get("time_horizon", "unspecified") not in VALID_TIME_HORIZONS:
+        failures.append({"check": "classification:time_horizon", "detail": classification.get("time_horizon")})
+    if classification.get("deliverable_intent") not in VALID_DELIVERABLE_INTENTS:
+        failures.append({"check": "classification:deliverable_intent", "detail": classification.get("deliverable_intent") or "missing"})
+    if not str(classification.get("routing_rationale", "")).strip():
+        failures.append({"check": "classification:routing_rationale", "detail": "missing"})
+    geographic_scope = classification.get("geographic_scope", {})
+    if not isinstance(geographic_scope, dict):
+        failures.append({"check": "classification:geographic_scope", "detail": "must be an object"})
+    else:
+        if not isinstance(geographic_scope.get("regions", []), list):
+            failures.append({"check": "classification:geographic_scope:regions", "detail": "must be a list"})
+        if not isinstance(geographic_scope.get("cross_border", False), bool):
+            failures.append({"check": "classification:geographic_scope:cross_border", "detail": "must be boolean"})
+    configured_question_types = question_types(config)
+    invalid_question_types = sorted(configured_question_types - VALID_QUESTION_TYPES)
+    if invalid_question_types:
+        failures.append({"check": "classification:question_types_valid", "detail": invalid_question_types})
+    if decision_type in DECISION_REQUIRED_QUESTION_TYPES:
+        missing_types = sorted(DECISION_REQUIRED_QUESTION_TYPES[decision_type] - configured_question_types)
+        if missing_types:
+            failures.append({"check": f"classification:required_question_types:{decision_type}", "detail": missing_types})
+    for index, item in enumerate(config.get("research_questions", []), start=1):
+        if isinstance(item, dict):
+            qid = str(item.get("id", f"RQ{index}"))
+            if not item.get("question_types"):
+                failures.append({"check": f"research_question:{qid}:question_types", "detail": "missing"})
+
+    memory_policy = config.get("memory_policy", {}) if isinstance(config.get("memory_policy", {}), dict) else {}
+    allowed_memory = set(listify(memory_policy.get("allowed_memory_classes", [])))
+    blocked_memory = set(listify(memory_policy.get("blocked_memory_classes", [])))
+    invalid_memory = sorted((allowed_memory | blocked_memory) - VALID_MEMORY_CLASSES)
+    if invalid_memory:
+        failures.append({"check": "memory_policy:valid_classes", "detail": invalid_memory})
+    if memory_policy.get("fresh_run_required") is not True:
+        failures.append({"check": "memory_policy:fresh_run_required", "detail": "must be true"})
+    if "conclusion" not in blocked_memory:
+        failures.append({"check": "memory_policy:blocked_conclusion_memory", "detail": "conclusion must be blocked"})
+    if "conclusion" in allowed_memory:
+        failures.append({"check": "memory_policy:allowed_conclusion_memory", "detail": "conclusion cannot be allowed"})
+    if memory_policy.get("source_cache_requires_revalidation") is not True:
+        failures.append({"check": "memory_policy:source_cache_revalidation", "detail": "must be true"})
+    if memory_policy.get("prior_reports_as_private_sources_only") is not True:
+        failures.append({"check": "memory_policy:prior_reports_private_only", "detail": "must be true"})
 
     if mode in mode_profiles:
         expected_deep_reads = mode_profiles[mode]["caps"]["deep_reads"]
@@ -246,7 +366,15 @@ def main() -> int:
         "research_mode": mode,
         "output_formats": output_formats,
         "active_modules": active_modules,
+        "classification": classification,
         "inferred_required_modules": sorted(inferred_modules),
+        "question_types": sorted(configured_question_types),
+        "memory_policy": {
+            "allowed_memory_classes": sorted(allowed_memory),
+            "blocked_memory_classes": sorted(blocked_memory),
+            "source_cache_requires_revalidation": memory_policy.get("source_cache_requires_revalidation"),
+            "prior_reports_as_private_sources_only": memory_policy.get("prior_reports_as_private_sources_only"),
+        },
         "module_query_counts": dict(module_query_counts),
         "user_hypotheses": hypothesis_ids,
         "candidate_trends": trend_ids,

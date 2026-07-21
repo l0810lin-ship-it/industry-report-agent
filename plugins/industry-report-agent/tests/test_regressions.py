@@ -25,6 +25,7 @@ enrich = load_module("enrich_evidence", "enrich_evidence.py")
 collector = load_module("collect_reach", "collect_reach.py")
 deliverable = load_module("validate_deliverable", "validate_deliverable.py")
 knowledge = load_module("process_knowledge", "process_knowledge.py")
+plan = load_module("validate_research_plan", "validate_research_plan.py")
 
 
 class EvidencePoolRegressionTests(unittest.TestCase):
@@ -193,6 +194,99 @@ class LocalKnowledgeRegressionTests(unittest.TestCase):
                 self.assertEqual("PRI-0001", ledger[0]["evidence_id"])
             finally:
                 knowledge.AGENT_DIR, knowledge.OUTPUT_DIR, knowledge.CONFIG_FILE = original_values
+
+
+class PlanClassificationMemoryRegressionTests(unittest.TestCase):
+    @staticmethod
+    def valid_config() -> dict:
+        return {
+            "research_mode": "standard",
+            "intake": {
+                "mode_selection": {"status": "selected", "source": "user_selected"},
+                "format_selection": {"status": "selected", "source": "user_selected"},
+            },
+            "output": {"formats": ["md"]},
+            "target": {"company": "百度", "industry": "本地生活AI", "region": "中国", "year": "2026"},
+            "classification": {
+                "decision_type": "enter_market",
+                "user_role": "strategy_team",
+                "time_horizon": "near_term_90_days",
+                "geographic_scope": {"regions": ["中国"], "cross_border": False},
+                "deliverable_intent": "management_report",
+                "primary_question_types": [
+                    "market_size",
+                    "competition",
+                    "business_model",
+                    "right_to_win",
+                    "validation_plan",
+                ],
+                "routing_rationale": "进入决策需要市场规模、竞争、商业模式、胜率和验证门。",
+                "required_gates": ["plan", "evidence", "results", "deliverable"],
+            },
+            "research_questions": [
+                {
+                    "id": "RQ1",
+                    "question": "百度是否应进入本地生活AI",
+                    "question_types": [
+                        "market_size",
+                        "competition",
+                        "business_model",
+                        "right_to_win",
+                        "validation_plan",
+                    ],
+                }
+            ],
+            "research_keywords": [{"query": "百度 本地生活 AI", "question_ids": ["RQ1"]}],
+            "focus_queries": [],
+            "competitor_keywords": {},
+            "platform_queries": [],
+            "user_hypotheses": [],
+            "research_design": {"active_modules": [], "module_rationale": {}, "candidate_trends": []},
+            "collection": {
+                "search_results_per_query": 5,
+                "adaptive_discovery": {"enabled": True, "expansion_step": 5, "min_new_urls_to_continue": 2},
+                "max_deep_reads": 12,
+            },
+            "memory_policy": {
+                "fresh_run_required": True,
+                "allowed_memory_classes": ["operational", "user_preference", "source_cache", "run_context", "evaluation_learning"],
+                "blocked_memory_classes": ["conclusion"],
+                "source_cache_requires_revalidation": True,
+                "prior_reports_as_private_sources_only": True,
+                "memory_use_log": [],
+            },
+        }
+
+    def run_plan_gate(self, config: dict) -> tuple[int, dict]:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            run_dir = Path(temp_dir)
+            (run_dir / "config.json").write_text(json.dumps(config, ensure_ascii=False), encoding="utf-8")
+            original_values = (plan.AGENT_DIR, plan.CONFIG_FILE, plan.OUTPUT_FILE)
+            plan.AGENT_DIR = run_dir
+            plan.CONFIG_FILE = run_dir / "config.json"
+            plan.OUTPUT_FILE = run_dir / "output" / "research_plan_report.json"
+            try:
+                code = plan.main()
+                report = json.loads(plan.OUTPUT_FILE.read_text(encoding="utf-8"))
+                return code, report
+            finally:
+                plan.AGENT_DIR, plan.CONFIG_FILE, plan.OUTPUT_FILE = original_values
+
+    def test_plan_gate_requires_classification_and_memory_policy(self):
+        config = self.valid_config()
+        code, report = self.run_plan_gate(config)
+        self.assertEqual(0, code)
+        self.assertEqual("pass", report["status"])
+        self.assertEqual("enter_market", report["classification"]["decision_type"])
+        self.assertIn("conclusion", report["memory_policy"]["blocked_memory_classes"])
+
+    def test_plan_gate_rejects_conclusion_memory_reuse(self):
+        config = self.valid_config()
+        config["memory_policy"]["allowed_memory_classes"].append("conclusion")
+        code, report = self.run_plan_gate(config)
+        self.assertEqual(3, code)
+        self.assertEqual("fail", report["status"])
+        self.assertTrue(any(item["check"] == "memory_policy:allowed_conclusion_memory" for item in report["failures"]))
 
 
 if __name__ == "__main__":
